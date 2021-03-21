@@ -3,26 +3,30 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import InfoBox from './components/infoBox/InfoBox';
 import Map from './components/map/Map';
+import Table from './components/table/Table';
 
 function App() {
 
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
+  const [tableData, setTableData] = useState([]);
 
 
   useEffect(() => {
     const getCountriesData= async () => {
-      await fetch("https://api.covid19api.com/countries")
+      fetch("https://disease.sh/v3/covid-19/countries")
       .then((Response)=> Response.json())
       .then((data) => {
         const countries = data.map((country)=> (
           {
-            name: country.Country,
-            value: country.ISO2,
+            name: country.country,
+            value: country.countryInfo.iso2,
           }
         ))
+        setTableData(data)
         setCountries(countries);
+        console.log(countries);
       })
     }
     getCountriesData();
@@ -80,6 +84,8 @@ function App() {
       <Card className="app__right">
         <CardContent>
           <h3> Live Cases by Country</h3>
+
+          <Table countries={tableData}/>
 
           <h3>Worldwide new cases</h3>
         </CardContent>
