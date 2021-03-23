@@ -2,16 +2,30 @@ import { Card, CardContent, FormControl, MenuItem, Select } from '@material-ui/c
 import { useEffect, useState } from 'react';
 import './App.css';
 import InfoBox from './components/infoBox/InfoBox';
+import LineGraph from './components/lineGraph/LineGraph';
 import Map from './components/map/Map';
 import Table from './components/table/Table';
+import { sortData } from './components/table/utils';
+import "leaflet/dist/leaflet.css";
 
 function App() {
 
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
+  const [casesType, setCasesType] = useState("cases");
   const [tableData, setTableData] = useState([]);
+  const [mapCenter, setMapCenter]= useState({ lat:38 , lng:- 97});
+  const [mapZoom, setMapZoom]= useState(3);
 
+
+  useEffect(() => {
+    fetch("https://disease.sh/v3/covid-19/all")
+      .then((response) => response.json())
+      .then((data) => {
+        setCountryInfo(data);
+      });
+  }, []);
 
   useEffect(() => {
     const getCountriesData= async () => {
@@ -24,7 +38,7 @@ function App() {
             value: country.countryInfo.iso2,
           }
         ))
-        setTableData(data)
+        setTableData(sortData(data))
         setCountries(countries);
         console.log(countries);
       })
@@ -34,9 +48,6 @@ function App() {
 
   const onCountryChange = async (event) => {
     const countryCode = event.target.value;
-    setCountry(countryCode);
-
-    console.log("countryCode>>>>>" , countryCode)
 
     const url = countryCode ==="worldwide"
     ? "https://disease.sh/v3/covid-19/all"
@@ -45,11 +56,14 @@ function App() {
    await fetch(url)
    .then(Response => Response.json())
    .then(data => {
+    setCountry(countryCode);
      setCountryInfo(data);
+     console.log(data.countryInfo.lat,data.countryInfo.long)
+     setMapCenter({lat:data.countryInfo.lat, lng:data.countryInfo.long})
+     console.log("AfterMapCenter>>>>", mapCenter)
+     setMapZoom(4)
    });
   }
-
-  console.log("countryInfo>>>>", countryInfo)
 
  
 
@@ -78,7 +92,9 @@ function App() {
           <InfoBox title="Recovered" cases={countryInfo.todayRecovered} total={countryInfo.recovered} />
           <InfoBox title="Deaths" cases={countryInfo.todayDeaths}  total={countryInfo.deaths}/>
         </div>
-          <Map />
+          <Map
+            center={mapCenter}
+            zoom={mapZoom}/>
       </div>
       
       <Card className="app__right">
@@ -87,7 +103,9 @@ function App() {
 
           <Table countries={tableData}/>
 
-          <h3>Worldwide new cases</h3>
+          <h3>Worldwide new {casesType}</h3>
+          <LineGraph casesType={casesType} />
+
         </CardContent>
       </Card>
       
