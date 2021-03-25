@@ -1,5 +1,6 @@
 import React, { useEffect , useState } from 'react'
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { showDataOnMap } from '../table/utils'
 
 import "./map.css"
 
@@ -13,7 +14,7 @@ function MyComponent({center , zoom}) {
   }
 
 
-function Map({center , zoom}) {
+function Map({ countries, casesType ,center , zoom}) {
    
     return (
         
@@ -24,6 +25,7 @@ function Map({center , zoom}) {
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  {showDataOnMap(countries, casesType)}
             </MapContainer>
         </div>
     )
